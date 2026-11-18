@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Censo Aparecida</title>
+<meta name="theme-color" content="#0b5c2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Censo">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  html, body { margin: 0; height: 100%; background: #0b5c2e; overflow: hidden; }
+  iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #eef1f5; }
+  #carregando { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    font: 17px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; color: #fff; }
+</style>
+</head>
+<body>
+<div id="carregando">Abrindo o Censo…</div>
+<script>
+  var APP = 'https://script.google.com/macros/s/AKfycby3WKEBd8YNzeVSw_s0cGH-ipTJeFvdP_j8lZlXlaHN-7Pmw5vZbYN7GvgUqwKzp6xG/exec';
+  var f = document.createElement('iframe');
+  f.src = APP;
+  f.title = 'Censo População em Situação de Rua - Aparecida de Goiânia';
+  f.onload = function () { var c = document.getElementById('carregando'); if (c) c.remove(); };
+  document.body.appendChild(f);
+</script>
+</body>
+</html>
