@@ -4,19 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Centro POP</title>
-<meta name="theme-color" content="#1f3a5f">
+<meta name="theme-color" content="#13513a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Centro POP">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="referrer" content="no-referrer">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>
-  html, body { margin: 0; height: 100%; background: #eef3f1; overflow: hidden; }
-  iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #eef3f1; }
+  html, body { margin: 0; height: 100%; background: #f3f6f4; overflow: hidden; }
+  iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #f3f6f4; }
   #carregando { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; color: #16323f; }
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; color: #13513a; }
 </style>
 </head>
 <body>
@@ -24,11 +25,29 @@
 <script>
   // Endereço do aplicativo (implantação do Apps Script)
   var APP = 'https://script.google.com/macros/s/AKfycby_xn4hgHSew9fNpXVdgLnTAbcuJny9nfR8B-Pfjrp1FeCAavRXTpraUr9yd8dWdq_F/exec';
-  // Repassa o código do aparelho vinculado (?d=...) para o aplicativo
+  var CHAVE = 'cp_aparelho';
+  function ler() { try { return localStorage.getItem(CHAVE); } catch (e) { return null; } }
+  function gravar(v) { try { v ? localStorage.setItem(CHAVE, v) : localStorage.removeItem(CHAVE); return true; } catch (e) { return false; } }
+  var hex = /^[a-f0-9]{64}$/;
+
+  // Ícones antigos traziam o código do aparelho no endereço (?d=...): guarda neste aparelho e tira do endereço
   var d = new URLSearchParams(location.search).get('d');
-  var src = APP + (d && /^[a-f0-9]{64}$/.test(d) ? '?d=' + d : '');
+  if (d && hex.test(d)) gravar(d);
+  if (location.search) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
+
+  // O aplicativo pede e guarda o código por mensagem, nunca pelo endereço
+  window.addEventListener('message', function (ev) {
+    if (!/^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/.test(ev.origin)) return;
+    var m = ev.data; if (!m || typeof m !== 'object') return;
+    var resp = null;
+    if (m.cp === 'pedir') { var v = ler(); resp = { cp: 'chave', d: v && hex.test(v) ? v : null }; }
+    else if (m.cp === 'guardar' && hex.test(String(m.d || ''))) resp = { cp: 'guardado', ok: gravar(m.d) };
+    else if (m.cp === 'apagar') resp = { cp: 'apagado', ok: gravar(null) };
+    if (resp && ev.source) ev.source.postMessage(resp, ev.origin);
+  });
+
   var f = document.createElement('iframe');
-  f.src = src;
+  f.src = APP;
   f.title = 'Centro POP';
   f.allow = 'microphone; camera; clipboard-write; geolocation';
   f.onload = function () { var c = document.getElementById('carregando'); if (c) c.remove(); };
